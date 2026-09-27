@@ -27,7 +27,11 @@ jobs:
       - name: Build APK
         working-directory: android
         run: ./gradlew assembleDebug
-
+- name: Set up Java
+  uses: actions/setup-java@v4
+  with:
+    distribution: temurin
+    java-version: '17'
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
