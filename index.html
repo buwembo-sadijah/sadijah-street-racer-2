@@ -1,165 +1,44 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>SADJIAH STREET RACER 2</title>
-<link rel="manifest" href="manifest.json">
-<style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07090b;color:#fff;font-family:system-ui,Arial;touch-action:none}
-canvas{display:block;width:100%;height:100%}.screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,#202830,#050607);z-index:5}
-.panel{width:min(94vw,560px);max-height:94vh;overflow:auto;background:#0c1116ee;border:1px solid #ffffff22;border-radius:24px;padding:24px;box-shadow:0 20px 80px #000}
-h1{margin:0 0 6px;font-size:30px}.sub{color:#b9c1c8;margin-top:0}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
-.choice{padding:15px;border-radius:15px;background:#151c22;border:1px solid #ffffff18;color:white;font-weight:800}.choice.active{outline:3px solid #5bbcff;background:#17314a}
-.start{width:100%;padding:16px;margin-top:14px;border:0;border-radius:15px;background:#26703b;color:#fff;font-size:18px;font-weight:900}
-#hud{position:fixed;inset:0;pointer-events:none;z-index:2}.top{display:flex;justify-content:space-between;padding:10px;gap:6px;font-weight:800}.badge{background:#0009;border-radius:11px;padding:7px 9px}
-#controls{position:absolute;inset:auto 12px 12px 12px;height:155px}.ctrl{pointer-events:auto;user-select:none;-webkit-user-select:none;touch-action:none;color:#fff;background:#101820dd;border:1px solid #ffffff30;box-shadow:0 5px 18px #0009;border-radius:18px;font-weight:900}
-#left,#right{position:absolute;bottom:12px;width:72px;height:72px;font-size:28px}#left{left:5px}#right{left:85px}
-#brake,#nitro{position:absolute;bottom:12px;width:74px;height:62px}#brake{right:92px;background:#8e2525dd}#nitro{right:8px;background:#245d83dd}
-#wheel{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:135px;height:135px;border-radius:50%;border:9px solid #777;background:#111b;display:none}
-#wheelKnob{position:absolute;left:50%;top:50%;width:46px;height:18px;transform:translate(-50%,-50%);background:#aaa;border-radius:10px}
-#tiltHint{position:absolute;left:50%;bottom:175px;transform:translateX(-50%);background:#0009;padding:7px 12px;border-radius:10px;display:none;font-size:12px}
-#msg{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);font-size:34px;font-weight:1000;text-align:center;text-shadow:0 4px 18px #000;display:none;z-index:4}
-.hidden{display:none!important}
-</style>
-</head>
-<body>
-<canvas id="game"></canvas>
+name: Build SADIJAH STREET RACER 2 APK
 
-<div id="hud">
- <div class="top">
-  <div class="badge">🏎️ WIZARD</div>
-  <div class="badge">🏁 <span id="level">1</span>/101</div>
-  <div class="badge">⚡ <span id="speed">0</span> km/h</div>
-  <div class="badge">🏆 <span id="score">0</span></div>
- </div>
- <div id="controls">
-  <button class="ctrl" id="left">◀</button><button class="ctrl" id="right">▶</button>
-  <button class="ctrl" id="brake">🛑 BRAKE</button><button class="ctrl" id="nitro">🚀 NITRO</button>
-  <div id="wheel"><div id="wheelKnob"></div></div>
-  <div id="tiltHint">Tilt your phone left/right to steer</div>
- </div>
-</div>
-<div id="msg"></div>
+on:
+  workflow_dispatch:
 
-<div class="screen" id="menu">
- <div class="panel">
-  <h1>🏎️ SADJIAH STREET RACER 2</h1>
-  <p class="sub">Automatic acceleration • Brake + Nitro • 101 levels</p>
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-  <h3>🛣️ Road</h3>
-  <div class="row">
-   <button class="choice active" id="oneWay">➡️ ONE-WAY</button>
-   <button class="choice" id="twoWay">↔️ TWO-WAY</button>
-  </div>
+    steps:
+      - name: Get game
+        uses: actions/checkout@v4
 
-  <h3>🎮 Controls</h3>
-  <div class="row">
-   <button class="choice active" id="buttons">🔘 BUTTONS</button>
-   <button class="choice" id="steering">🎡 STEERING</button>
-  </div>
-  <button class="choice" id="tilt" style="width:100%;margin-top:2px">📱 TILT PHONE</button>
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
 
-  <button class="start" id="start">START RACE</button>
-  <p style="font-size:12px;color:#929aa0">Acceleration is automatic. Use Brake to slow down and Nitro for a speed boost.</p>
- </div>
-</div>
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
 
-<script>
-const c=document.getElementById('game'),x=c.getContext('2d');
-let W,H,dpr;function resize(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;c.width=W*dpr;c.height=H*dpr;x.setTransform(dpr,0,0,dpr,0,0)}addEventListener('resize',resize);resize();
+      - name: Create Android project
+        run: |
+          npm init -y
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          mkdir -p www
+          cp index.html www/
+          cp manifest.json www/
+          npx cap init "SADIJAH STREET RACER 2" "com.sadijah.streetracer2" --web-dir www
+          npx cap add android
+          npx cap sync android
 
-let roadMode='one',controlMode='buttons',playing=false,level=1,score=0,last=0,steer=0,brake=false,nitro=false,tiltValue=0;
-let car={x:0,y:0,w:36,h:66,speed:0,max:300,lane:0},traffic=[],trees=[],distance=0,shake=0;
+      - name: Build APK
+        working-directory: android
+        run: ./gradlew assembleDebug
 
-const one=document.getElementById('oneWay'),two=document.getElementById('twoWay'),buttons=document.getElementById('buttons'),steering=document.getElementById('steering'),tilt=document.getElementById('tilt');
-function setRoad(v){roadMode=v;one.classList.toggle('active',v==='one');two.classList.toggle('active',v==='two')}
-function setControl(v){controlMode=v;buttons.classList.toggle('active',v==='buttons');steering.classList.toggle('active',v==='steering');tilt.classList.toggle('active',v==='tilt')}
-one.onclick=()=>setRoad('one');two.onclick=()=>setRoad('two');buttons.onclick=()=>setControl('buttons');steering.onclick=()=>setControl('steering');tilt.onclick=()=>setControl('tilt');
-
-function reset(){car={x:0,y:0,w:36,h:66,speed:90,max:300+level*3,lane:0};traffic=[];trees=[];distance=0;steer=0;shake=0;
- for(let i=0;i<12;i++){trees.push({x:(Math.random()<.5?-1:1)*(220+Math.random()*230),y:i*260+100})}
- for(let i=0;i<8+Math.floor(level/8);i++)spawnTraffic(i*240+300);updateUI()}
-function spawnTraffic(y){let lane=roadMode==='one'?(Math.random()<.5?-1:1):(Math.floor(Math.random()*3)-1);let oncoming=roadMode==='two'&&Math.random()<.5;traffic.push({x:lane*62,y:y+Math.random()*80,lane,oncoming,w:34,h:62,s:100+Math.random()*70+level*2})}
-function updateUI(){document.getElementById('level').textContent=level;document.getElementById('score').textContent=score;document.getElementById('speed').textContent=Math.round(car.speed)}
-
-function start(){menu.classList.add('hidden');playing=true;reset();applyControls();if(controlMode==='tilt')requestTilt()}
-document.getElementById('start').onclick=start;
-
-function applyControls(){
- document.getElementById('left').style.display=controlMode==='buttons'?'block':'none';
- document.getElementById('right').style.display=controlMode==='buttons'?'block':'none';
- document.getElementById('wheel').style.display=controlMode==='steering'?'block':'none';
- document.getElementById('tiltHint').style.display=controlMode==='tilt'?'block':'none';
-}
-function hold(el,down,up){el.addEventListener('pointerdown',e=>{e.preventDefault();down();el.setPointerCapture?.(e.pointerId)},{passive:false});['pointerup','pointercancel','lostpointercapture'].forEach(ev=>el.addEventListener(ev,e=>{e.preventDefault();up()}, {passive:false}))}
-hold(document.getElementById('left'),()=>steer=-1,()=>{if(steer<0)steer=0});
-hold(document.getElementById('right'),()=>steer=1,()=>{if(steer>0)steer=0});
-hold(document.getElementById('brake'),()=>brake=true,()=>brake=false);
-hold(document.getElementById('nitro'),()=>nitro=true,()=>nitro=false);
-
-const wheel=document.getElementById('wheel');
-function wheelMove(e){let r=wheel.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2);steer=Math.max(-1,Math.min(1,dx/55));document.getElementById('wheelKnob').style.transform=`translate(calc(-50% + ${steer*42}px),-50%)`}
-wheel.addEventListener('pointerdown',e=>{e.preventDefault();wheel.setPointerCapture(e.pointerId);wheelMove(e)},{passive:false});
-wheel.addEventListener('pointermove',e=>{if(e.buttons)wheelMove(e)},{passive:false});
-function wheelReset(){steer=0;document.getElementById('wheelKnob').style.transform='translate(-50%,-50%)'}
-wheel.addEventListener('pointerup',wheelReset);wheel.addEventListener('pointercancel',wheelReset);wheel.addEventListener('lostpointercapture',wheelReset);
-
-addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='a')steer=-1;if(e.key==='ArrowRight'||e.key==='d')steer=1;if(e.key===' ')brake=true;if(e.key==='Shift')nitro=true});
-addEventListener('keyup',e=>{if((e.key==='ArrowLeft'||e.key==='a')&&steer<0)steer=0;if((e.key==='ArrowRight'||e.key==='d')&&steer>0)steer=0;if(e.key===' ')brake=false;if(e.key==='Shift')nitro=false});
-
-function requestTilt(){
- if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
-  DeviceOrientationEvent.requestPermission().then(v=>{if(v==='granted')addEventListener('deviceorientation',tiltHandler)}).catch(()=>{});
- }else addEventListener('deviceorientation',tiltHandler);
-}
-function tiltHandler(e){if(controlMode!=='tilt')return;let g=e.gamma||0;tiltValue=Math.max(-1,Math.min(1,g/25));steer=tiltValue}
-
-function update(dt){
- if(!playing)return;
- let accel=brake?-210:135;
- if(nitro)accel+=220;
- car.speed+=accel*dt;
- if(!brake)car.speed=Math.min(car.speed,car.max+(nitro?100:0));else car.speed=Math.max(35,car.speed);
- car.x+=steer*230*dt*(0.55+car.speed/450);
- car.x=Math.max(-118,Math.min(118,car.x));
- distance+=car.speed*dt;
- score+=Math.floor(car.speed*dt/10);
- for(const t of traffic){t.y-=car.speed*dt-t.s*dt*(t.oncoming?-1:.28)}
- for(const tr of traffic){
-  if(Math.abs(tr.x-car.x)<35&&Math.abs(tr.y-(H-125))<55){crash();return}
- }
- traffic=traffic.filter(t=>t.y<H+180);
- while(traffic.length<8+Math.floor(level/8))spawnTraffic(-Math.random()*1000-300);
- for(const tr of traffic)if(tr.y>H+100){score+=100;tr.y=-200-Math.random()*500}
- if(distance>4500){level++;if(level>101){win();return}reset();flash('LEVEL '+level)}
- updateUI();
-}
-function crash(){car.speed*=.35;score=Math.max(0,score-150);shake=14;flash('💥 CRASH!');for(let i=0;i<5;i++)spawnTraffic(-300-i*100);setTimeout(()=>{},1)}
-function flash(t){msg.textContent=t;msg.style.display='block';clearTimeout(flash.t);flash.t=setTimeout(()=>msg.style.display='none',900)}
-function win(){playing=false;msg.innerHTML='🏆 YOU WIN!<br><span style="font-size:18px">LEVEL 101 COMPLETE</span>';msg.style.display='block'}
-
-function draw(){
- x.clearRect(0,0,W,H);x.fillStyle='#42633c';x.fillRect(0,0,W,H);
- const roadW=330,rx=W/2-roadW/2;
- x.fillStyle='#303438';x.fillRect(rx,0,roadW,H);
- x.fillStyle='#e9dfbd';x.fillRect(rx+8,0,5,H);x.fillRect(rx+roadW-13,0,5,H);
- for(let y=-80+(distance%100);y<H;y+=100){x.fillStyle='#e6e6d0';x.fillRect(W/2-3,y,6,50)}
- if(roadMode==='two'){x.fillStyle='#e5b44b';x.fillRect(W/2-2,0,4,H)}
- for(const t of trees){let yy=((t.y+distance*.55)% (H+500))-200;x.fillStyle='#493421';x.fillRect(W/2+t.x-5,yy,10,35);x.fillStyle='#214f2b';x.beginPath();x.arc(W/2+t.x,yy,24,0,7);x.fill()}
- for(const tr of traffic){let yy=tr.y;drawCar(W/2+tr.x,yy,tr.oncoming?'#b53b35':'#315b9a',tr.oncoming)}
- drawCar(W/2+car.x,H-125,'#d7a51e',false,true);
- if(shake>0){shake*=.88}
-}
-function drawCar(cx,cy,col,flip=false,player=false){
- x.save();x.translate(cx,cy);if(flip)x.rotate(Math.PI);
- x.fillStyle=col;x.beginPath();x.roundRect(-18,-32,36,64,8);x.fill();
- x.fillStyle='#151b20';x.fillRect(-13,-17,26,19);x.fillStyle='#7da0ae';x.fillRect(-10,-14,20,10);
- x.fillStyle='#111';x.fillRect(-21,-23,6,14);x.fillRect(15,-23,6,14);x.fillRect(-21,9,6,14);x.fillRect(15,9,6,14);
- if(player){x.fillStyle='#fff';x.fillRect(-13,23,9,4);x.fillRect(4,23,9,4)}
- x.restore();
-}
-function loop(t){let dt=Math.min(.033,(t-last)/1000||0);last=t;update(dt);draw();requestAnimationFrame(loop)}requestAnimationFrame(loop);
-</script>
-</body>
-</html>
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SADIJAH-STREET-RACER-2
+          path: android/app/build/outputs/apk/debug/app-debug.apk
